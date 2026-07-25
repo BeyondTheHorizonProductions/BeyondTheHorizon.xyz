@@ -1,0 +1,341 @@
+/* ============================================================
+   Beyond the Horizon — sunrise title screen
+   The scene is bright, so the type is ink rather than light:
+   dark warm brown on a haze of the same light that's already
+   in the sky. The image itself is untouched.
+   ============================================================ */
+
+/* Minecraft display font — public domain, by JDGraphics, self-hosted.
+   Source: https://www.fontspace.com/minecraft-font-f28180 */
+@font-face {
+  font-family: 'Minecraft';
+  src: url('fonts/Minecraft-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Minecraft';
+  src: url('fonts/Minecraft-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Dusk indigo — the sky on the far side of the horizon. Being the
+     complement of the sunrise it separates from every warm tone in
+     the image instead of sinking into it. */
+  --ink: #1f2a47;
+  --ink-soft: rgba(31, 42, 71, 0.85);
+  --ember: #b33a12;            /* the saturated top of the sky */
+  --cream: #fff6e4;            /* the light around the sun */
+  --sky: #e89150;
+
+  --display: 'Minecraft', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'Lucida Console', monospace;
+
+  --edge: clamp(1.5rem, 7vw, 8rem);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  color: var(--ink);
+  font-family: var(--display);
+  background: var(--sky);
+  overflow-x: hidden;
+}
+
+/* Full-bleed scene, unchanged ------------------------------- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: url('image.png') center / cover no-repeat;
+}
+
+/* Haze, not a scrim. Light lifted out of the sun and laid over
+   the left field and the low band, so ink type clears 4.5:1
+   everywhere it lands while the scene stays sunlit. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(102deg, rgba(255, 246, 228, 0.42) 0%, rgba(255, 246, 228, 0.30) 30%, rgba(255, 246, 228, 0.06) 60%, transparent 78%),
+    linear-gradient(to top, rgba(255, 246, 228, 0.55) 0%, rgba(255, 246, 228, 0.12) 15%, transparent 32%);
+}
+
+/* Stage / layout ------------------------------------------- */
+.stage {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(3rem, 8vh, 6rem) var(--edge) clamp(4.5rem, 12vh, 7rem);
+}
+
+/* Auto margins rather than justify-content: centred, but when the
+   viewport is too short (a phone held sideways) the block spills
+   downward into scroll instead of clipping off the top. */
+.content {
+  width: 100%;
+  margin-block: auto;
+}
+
+/* Staged entrance — one quiet moment ----------------------- */
+.wordmark,
+.portals {
+  animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.portals {
+  animation-delay: 0.32s;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* Wordmark — the poster ------------------------------------ */
+.wordmark {
+  font-family: var(--display);
+  font-weight: 700;
+  /* One line, always. "Beyond the Horizon" measures 11.49em in this
+     face, and the edges eat 14vw, so 11.49 x 7vw = 80vw < 86vw keeps
+     the line inside the viewport all the way down to a 320px phone.
+     No rem floor — a floor would force an overflow on narrow screens. */
+  font-size: min(7vw, 5.25rem);
+  line-height: 1;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+/* Portals — blocky, pressable, no glass and no gradients --- */
+.portals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  /* Tracks the wordmark (vw), not the window height. A vh-based gap
+     silently grows on a tall window and drifts away from the type. */
+  margin-top: clamp(1rem, 1.5vw, 1.5rem);
+}
+
+.portal {
+  display: inline-flex;
+  align-items: center;
+  padding: 1.15rem 2.15rem 0.95rem;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1rem, 2.4vw, 1.28rem);
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  text-decoration: none;
+  background: rgba(255, 246, 228, 0.34);
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.18s cubic-bezier(0.2, 0.8, 0.3, 1),
+    box-shadow 0.18s cubic-bezier(0.2, 0.8, 0.3, 1),
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.portal:hover,
+.portal:focus-visible {
+  background: var(--ink);
+  color: var(--cream);
+  transform: translate(-3px, -3px);
+  box-shadow: 5px 5px 0 rgba(31, 42, 71, 0.30);
+}
+
+.portal:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 3px;
+}
+
+/* Full press — the block seats back down */
+.portal:active {
+  transform: translate(0, 0);
+  box-shadow: 0 0 0 rgba(31, 42, 71, 0);
+  transition-duration: 0.06s;
+}
+
+/* Disclaimer — deliberately quiet, pinned low -------------- */
+.disclaimer {
+  position: absolute;
+  left: var(--edge);
+  right: var(--edge);
+  bottom: clamp(1.5rem, 4vh, 2.5rem);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* Leaving overlay — a light dusk wash, not a curtain. The bar is
+   deliberately indeterminate: the navigation fires immediately, so a
+   bar that filled to 100% would be implying progress it never
+   measures. It just says the button registered. ------------- */
+.leaving {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: var(--edge);
+  background: rgba(31, 42, 71, 0.30);
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+/* display:grid would otherwise defeat the hidden attribute */
+.leaving[hidden] {
+  display: none;
+}
+
+.leaving.is-on {
+  opacity: 1;
+}
+
+.leaving-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.85rem, 2vw, 1.15rem);
+  /* Nudged just below centre so it clears the wordmark. Transform
+     rather than margin so the offset is exact, and vw rather than vh
+     so it can't grow on a tall window. */
+  transform: translateY(clamp(1.25rem, 2.5vw, 2.25rem));
+}
+
+/* Ink, not cream: against a wash this light, cream would sit at ~2.7:1.
+   Ink clears 4.5:1 and keeps the overlay in the page's own palette. */
+.leaving-msg {
+  font-family: var(--display);
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  text-align: center;
+}
+
+/* weight rather than colour — the warm accents all fail on this wash */
+.leaving-msg span {
+  font-weight: 700;
+}
+
+.loadbar {
+  display: flex;
+  gap: clamp(3px, 0.8vw, 5px);
+}
+
+.loadbar i {
+  width: clamp(11px, 2.4vw, 16px);
+  height: clamp(15px, 3.2vw, 22px);
+  border: 2px solid rgba(31, 42, 71, 0.35);
+  background: transparent;
+  /* CSS, not JS — script timers can be throttled once navigation
+     starts, but the animation keeps running until the page unloads. */
+  animation: wave 1.05s ease-in-out infinite;
+}
+
+.loadbar i:nth-child(1) { animation-delay: 0s; }
+.loadbar i:nth-child(2) { animation-delay: 0.08s; }
+.loadbar i:nth-child(3) { animation-delay: 0.16s; }
+.loadbar i:nth-child(4) { animation-delay: 0.24s; }
+.loadbar i:nth-child(5) { animation-delay: 0.32s; }
+.loadbar i:nth-child(6) { animation-delay: 0.40s; }
+.loadbar i:nth-child(7) { animation-delay: 0.48s; }
+.loadbar i:nth-child(8) { animation-delay: 0.56s; }
+
+@keyframes wave {
+  0%, 60%, 100% {
+    background-color: transparent;
+    border-color: rgba(31, 42, 71, 0.35);
+  }
+  30% {
+    background-color: var(--ink);
+    border-color: var(--ink);
+  }
+}
+
+/* Small screens -------------------------------------------- */
+/* On a phone the sun sits high in the crop, so the block drops to
+   the calm band of water at the bottom. */
+@media (max-width: 560px) {
+  .content {
+    margin-top: auto;
+    margin-bottom: 0;
+  }
+
+  .stage {
+    padding-bottom: clamp(5rem, 16vh, 8rem);
+  }
+
+}
+
+@media (max-width: 480px) {
+  .portals {
+    gap: 0.7rem;
+  }
+
+  .portal {
+    flex: 1 1 100%;
+    justify-content: center;
+    padding: 0.9rem 1rem 0.75rem;
+  }
+}
+
+/* Respect reduced motion ----------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .wordmark,
+  .portals {
+    animation: none;
+  }
+
+  .portal {
+    transition: background-color 0.18s ease, color 0.18s ease;
+  }
+
+  .portal:hover,
+  .portal:focus-visible,
+  .portal:active {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* No travelling wave — hold a steady bar so there is still a
+     visible sign the button registered. */
+  .leaving {
+    transition: none;
+  }
+
+  .loadbar i {
+    animation: none;
+    background-color: var(--ink);
+    border-color: var(--ink);
+  }
+}
