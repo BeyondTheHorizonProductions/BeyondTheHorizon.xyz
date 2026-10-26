@@ -40,7 +40,7 @@
         return;
       }
       e.preventDefault();
-      go(link.href, (link.textContent || '').trim());
+      go(link.href, link.getAttribute('data-name') || (link.textContent || '').trim());
     });
   });
 
@@ -52,4 +52,45 @@
     overlay.classList.remove('is-on');
     overlay.hidden = true;
   });
+})();
+
+/* The book.
+   Pages are turned one at a time, like the book screen in the game:
+   arrows at the foot, hidden at either end, and the arrow keys work
+   too. Without this file every page is simply shown in turn. */
+(function () {
+  'use strict';
+
+  var book = document.getElementById('pages');
+  if (!book) return;
+
+  var pages = book.querySelectorAll('.page');
+  var prev = book.querySelector('.turn.prev');
+  var next = book.querySelector('.turn.next');
+  var current = 0;
+
+  function show(i) {
+    current = Math.max(0, Math.min(pages.length - 1, i));
+    pages.forEach(function (page, n) {
+      page.classList.toggle('is-current', n === current);
+    });
+    prev.hidden = current === 0;
+    next.hidden = current === pages.length - 1;
+
+    // keep focus on the book when the arrow just used disappears
+    if (document.activeElement && document.activeElement.hidden) {
+      (prev.hidden ? next : prev).focus();
+    }
+  }
+
+  prev.addEventListener('click', function () { show(current - 1); });
+  next.addEventListener('click', function () { show(current + 1); });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === 'ArrowLeft') show(current - 1);
+    if (e.key === 'ArrowRight') show(current + 1);
+  });
+
+  show(0);
 })();

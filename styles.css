@@ -1,8 +1,10 @@
 /* ============================================================
-   Beyond the Horizon — sunrise title screen
-   The scene is bright, so the type is ink rather than light:
-   dark warm brown on a haze of the same light that's already
-   in the sky. The image itself is untouched.
+   Beyond the Horizon — a written book held open over the sunrise.
+   Modelled on the Java Edition book screen: a single page in a
+   leather rim, stitched down the left, page count in the corner
+   and arrows at the foot to turn. The rim, stitches and icons are
+   drawn for this site; the page-turn arrow follows the game's own.
+   Without JS both pages are simply shown, one under the other.
    ============================================================ */
 
 /* Minecraft display font — public domain, by JDGraphics, self-hosted.
@@ -24,19 +26,29 @@
 }
 
 :root {
-  /* Dusk indigo — the sky on the far side of the horizon. Being the
-     complement of the sunrise it separates from every warm tone in
-     the image instead of sinking into it. */
-  --ink: #1f2a47;
-  --ink-soft: rgba(31, 42, 71, 0.85);
-  --ember: #b33a12;            /* the saturated top of the sky */
-  --cream: #fff6e4;            /* the light around the sun */
-  --sky: #e89150;
+  /* One texture pixel. Everything in the book is a whole multiple
+     of it, so the pixel art stays crisp. */
+  --px: 3px;
 
-  --display: 'Minecraft', system-ui, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, 'Lucida Console', monospace;
-
-  --edge: clamp(1.5rem, 7vw, 8rem);
+  --paper: #fbf4e1;
+  --paper-shade: rgba(226, 206, 160, 0.38);
+  --paper-edge: #e6d6b0;
+  --rim: #85401f;
+  --text: #000;
+  --grey: #555;            /* the game's dark grey text colour */
+  --link: #0000aa;         /* ...and its dark blue */
+  --link-hover: #5555ff;   /* ...and its blue */
+  /* the page-turn arrow: a faint pencil line at rest... */
+  --arrow-line: #e1d3b7;
+  --arrow-dark: #c5b091;
+  --arrow-hi: #fdf6e5;
+  /* ...and the game's orange-red under the pointer */
+  --arrow-hover-fill: #ec7746;
+  --arrow-hover-line: #dd4c1d;
+  --arrow-hover-dark: #ce1f00;
+  --arrow-hover-hi: #e58a62;
+  --dusk: #1f2a47;
+  --cream: #fff6e4;
 }
 
 *,
@@ -54,13 +66,16 @@ html {
 body {
   min-height: 100vh;
   min-height: 100svh;
-  color: var(--ink);
-  font-family: var(--display);
-  background: var(--sky);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Minecraft', system-ui, sans-serif;
+  color: var(--text);
+  background: var(--dusk);
   overflow-x: hidden;
 }
 
-/* Full-bleed scene, unchanged ------------------------------- */
+/* The scene. A fixed layer rather than background-attachment:
+   fixed, which iOS Safari ignores and mis-scales. */
 body::before {
   content: '';
   position: fixed;
@@ -69,206 +84,419 @@ body::before {
   background: url('image.png') center / cover no-repeat;
 }
 
-/* Haze, not a scrim. Light lifted out of the sun and laid over
-   the left field and the low band, so ink type clears 4.5:1
-   everywhere it lands while the scene stays sunlit. */
+/* A light dusk wash so the book sits forward of the scene, a
+   little deeper at the foot for the disclaimer. */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   background:
-    linear-gradient(102deg, rgba(255, 246, 228, 0.42) 0%, rgba(255, 246, 228, 0.30) 30%, rgba(255, 246, 228, 0.06) 60%, transparent 78%),
-    linear-gradient(to top, rgba(255, 246, 228, 0.55) 0%, rgba(255, 246, 228, 0.12) 15%, transparent 32%);
+    linear-gradient(to top, rgba(20, 24, 40, 0.5) 0%, transparent 22%),
+    rgba(31, 42, 71, 0.22);
 }
 
-/* Stage / layout ------------------------------------------- */
+a {
+  color: var(--link);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--link-hover);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--link-hover);
+  outline-offset: 2px;
+}
+
+/* Stage ---------------------------------------------------- */
 .stage {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 5vh, 3rem) 1rem 1rem;
+}
+
+/* The book ------------------------------------------------- */
+/* The rim is a nine-slice of a pixel-art frame: dark outline,
+   light top-left edge, shaded bottom-right, notched corners. The
+   single page takes the screen's width (up to a comfortable
+   measure) rather than the texture's 146px, and is as tall as its
+   text needs. */
+.book {
+  width: min(40rem, 100%);
+  display: grid;
+  border: calc(6 * var(--px)) solid var(--rim);
+  border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 13 13' shape-rendering='crispEdges'%3E%3Cpath fill='%232e1408' d='M2 0h9v1h-9zM1 1h1v1h-1zM11 1h1v1h-1zM0 2h1v1h-1zM12 2h1v1h-1zM0 3h1v1h-1zM12 3h1v1h-1zM0 4h1v1h-1zM12 4h1v1h-1zM0 5h1v1h-1zM12 5h1v1h-1zM0 6h1v1h-1zM12 6h1v1h-1zM0 7h1v1h-1zM12 7h1v1h-1zM0 8h1v1h-1zM12 8h1v1h-1zM0 9h1v1h-1zM12 9h1v1h-1zM0 10h1v1h-1zM12 10h1v1h-1zM1 11h1v1h-1zM11 11h1v1h-1zM2 12h9v1h-9z'/%3E%3Cpath fill='%23a85d36' d='M2 1h9v1h-9zM1 2h1v1h-1zM1 3h1v1h-1zM1 4h1v1h-1zM1 5h1v1h-1zM1 6h1v1h-1zM1 7h1v1h-1zM1 8h1v1h-1zM1 9h1v1h-1zM1 10h1v1h-1z'/%3E%3Cpath fill='%2385401f' d='M2 2h9v1h-9zM2 3h9v1h-9zM2 4h9v1h-9zM2 5h3v1h-3zM8 5h3v1h-3zM2 6h3v1h-3zM8 6h3v1h-3zM2 7h3v1h-3zM8 7h3v1h-3zM2 8h9v1h-9zM2 9h9v1h-9zM2 10h9v1h-9z'/%3E%3Cpath fill='%235e2a12' d='M11 2h1v1h-1zM11 3h1v1h-1zM11 4h1v1h-1zM11 5h1v1h-1zM11 6h1v1h-1zM11 7h1v1h-1zM11 8h1v1h-1zM11 9h1v1h-1zM11 10h1v1h-1zM2 11h9v1h-9z'/%3E%3Cpath fill='%233f1c0b' d='M5 5h3v1h-3zM5 6h1v1h-1zM7 6h1v1h-1zM5 7h3v1h-3z'/%3E%3C/svg%3E") 6 / calc(6 * var(--px)) stretch;
+  background: var(--rim);
+  background-clip: padding-box;
+  filter: drop-shadow(0 1.25rem 1.75rem rgba(15, 18, 30, 0.45));
+}
+
+/* The paper pieces, shared by the one-page view (where the whole
+   block of pages is the sheet) and the open book (where each page
+   is). Declared on .book so --px resolves at each breakpoint. */
+.book {
+  --paper-bg:
+    radial-gradient(ellipse 60% 40% at 25% 20%, var(--paper-shade), transparent 70%),
+    radial-gradient(ellipse 50% 35% at 75% 65%, var(--paper-shade), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 40% 90%, var(--paper-shade), transparent 70%),
+    var(--paper);
+  /* a couple of page edges showing down the right */
+  --paper-edges:
+    inset calc(-1 * var(--px)) 0 0 var(--paper-edge),
+    inset calc(-3 * var(--px)) 0 0 var(--paper),
+    inset calc(-4 * var(--px)) 0 0 var(--paper-edge);
+  /* the folded bottom-right corner, cut as a pixel staircase */
+  --paper-fold-cut: polygon(
+    0 0, 100% 0,
+    100% calc(100% - 7 * var(--px)),
+    calc(100% - 1 * var(--px)) calc(100% - 7 * var(--px)),
+    calc(100% - 1 * var(--px)) calc(100% - 6 * var(--px)),
+    calc(100% - 2 * var(--px)) calc(100% - 6 * var(--px)),
+    calc(100% - 2 * var(--px)) calc(100% - 5 * var(--px)),
+    calc(100% - 3 * var(--px)) calc(100% - 5 * var(--px)),
+    calc(100% - 3 * var(--px)) calc(100% - 4 * var(--px)),
+    calc(100% - 4 * var(--px)) calc(100% - 4 * var(--px)),
+    calc(100% - 4 * var(--px)) calc(100% - 3 * var(--px)),
+    calc(100% - 5 * var(--px)) calc(100% - 3 * var(--px)),
+    calc(100% - 5 * var(--px)) calc(100% - 2 * var(--px)),
+    calc(100% - 6 * var(--px)) calc(100% - 2 * var(--px)),
+    calc(100% - 6 * var(--px)) calc(100% - 1 * var(--px)),
+    calc(100% - 7 * var(--px)) calc(100% - 1 * var(--px)),
+    calc(100% - 7 * var(--px)) 100%,
+    0 100%);
+  --stitches: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2' height='12' viewBox='0 0 2 12' shape-rendering='crispEdges'%3E%3Cpath fill='%23c0201f' d='M1 0h1v1h-1zM0 1h1v1h-1zM0 2h1v1h-1zM0 3h1v1h-1zM0 4h1v1h-1zM0 5h1v1h-1z'/%3E%3Cpath fill='%238a1414' d='M0 6h1v1h-1zM1 7h1v1h-1z'/%3E%3C/svg%3E");
+  --fold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7' viewBox='0 0 7 7' shape-rendering='crispEdges'%3E%3Cpath fill='%23b89c66' d='M0 0h6v1h-6zM0 1h1v1h-1zM0 2h1v1h-1zM0 3h1v1h-1zM0 4h1v1h-1zM0 5h1v1h-1z'/%3E%3Cpath fill='%23efe3c2' d='M1 1h3v1h-3zM1 2h2v1h-2zM1 3h1v1h-1z'/%3E%3Cpath fill='%23d9c59a' d='M4 1h1v1h-1zM3 2h1v1h-1zM2 3h1v1h-1zM1 4h1v1h-1z'/%3E%3C/svg%3E");
+}
+
+/* The page. Mottled paper, a couple of page edges showing down the
+   right, and the bottom-right corner folded over. */
+.pages {
   position: relative;
-  min-height: 100vh;
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  padding: clamp(3rem, 8vh, 6rem) var(--edge) clamp(4.5rem, 12vh, 7rem);
+  background: var(--paper-bg);
+  box-shadow: var(--paper-edges);
+  clip-path: var(--paper-fold-cut);
 }
 
-/* Auto margins rather than justify-content: centred, but when the
-   viewport is too short (a phone held sideways) the block spills
-   downward into scroll instead of clipping off the top. */
-.content {
-  width: 100%;
-  margin-block: auto;
-}
-
-/* Staged entrance — one quiet moment ----------------------- */
-.wordmark,
-.portals,
-.socials {
-  animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.portals {
-  animation-delay: 0.32s;
-}
-
-.socials {
-  animation-delay: 0.48s;
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-}
-
-/* Wordmark — the poster ------------------------------------ */
-.wordmark {
-  font-family: var(--display);
-  font-weight: 700;
-  /* One line, always. "Beyond the Horizon" measures 11.49em in this
-     face, and the edges eat 14vw, so 11.49 x 7vw = 80vw < 86vw keeps
-     the line inside the viewport all the way down to a 320px phone.
-     No rem floor — a floor would force an overflow on narrow screens. */
-  font-size: min(7vw, 5.25rem);
-  line-height: 1;
-  letter-spacing: 0.005em;
-  white-space: nowrap;
-  color: var(--ink);
-}
-
-/* Portals — blocky, pressable, no glass and no gradients --- */
-.portals {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.85rem;
-  /* Tracks the wordmark (vw), not the window height. A vh-based gap
-     silently grows on a tall window and drifts away from the type. */
-  margin-top: clamp(1rem, 1.5vw, 1.5rem);
-}
-
-.portal {
-  display: inline-flex;
-  align-items: center;
-  padding: 1.15rem 2.15rem 0.95rem;
-  font-family: var(--display);
-  font-weight: 400;
-  font-size: clamp(1rem, 2.4vw, 1.28rem);
-  letter-spacing: 0.02em;
-  color: var(--ink);
-  text-decoration: none;
-  background: rgba(255, 246, 228, 0.34);
-  border: 2px solid var(--ink);
-  border-radius: 2px;
-  -webkit-tap-highlight-color: transparent;
-  transition:
-    transform 0.18s cubic-bezier(0.2, 0.8, 0.3, 1),
-    box-shadow 0.18s cubic-bezier(0.2, 0.8, 0.3, 1),
-    background-color 0.18s ease,
-    color 0.18s ease;
-}
-
-.portal:hover,
-.portal:focus-visible {
-  background: var(--ink);
-  color: var(--cream);
-  transform: translate(-3px, -3px);
-  box-shadow: 5px 5px 0 rgba(31, 42, 71, 0.30);
-}
-
-.portal:focus-visible {
-  outline: 2px solid var(--ember);
-  outline-offset: 3px;
-}
-
-/* Full press — the block seats back down */
-.portal:active {
-  transform: translate(0, 0);
-  box-shadow: 0 0 0 rgba(31, 42, 71, 0);
-  transition-duration: 0.06s;
-}
-
-/* Socials — the same block, shrunk to a square holding one glyph.
-   Pinned bottom-right on the disclaimer's baseline, so the wordmark
-   and the three portals stay the thing you read first and the
-   socials read as a signature in the corner. --------------- */
-.socials {
+/* Binding stitches down the left edge */
+.pages::before {
+  content: '';
   position: absolute;
-  right: var(--edge);
-  bottom: clamp(1.5rem, 4vh, 2.5rem);
-  display: flex;
-  gap: 0.6rem;
+  top: calc(4 * var(--px));
+  bottom: calc(4 * var(--px));
+  left: calc(2 * var(--px));
+  width: calc(2 * var(--px));
+  background: var(--stitches) 0 0 / calc(2 * var(--px)) calc(12 * var(--px)) repeat-y;
 }
 
-.social {
+/* The fold itself: the back of the turned-over corner */
+.pages::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: calc(7 * var(--px));
+  height: calc(7 * var(--px));
+  background: var(--fold) 0 0 / 100% 100% no-repeat;
+}
+
+.page {
+  position: relative;
+  /* lets the title size itself against the page's own width */
+  container-type: inline-size;
+  /* the top clears the page number, whatever the pixel size */
+  padding:
+    calc(5 * var(--px) + 1.75rem)
+    calc(9 * var(--px))
+    calc(10 * var(--px))
+    calc(10 * var(--px));
+}
+
+/* without JS the pages run on, ruled apart like a page break */
+.page + .page {
+  border-top: var(--px) dashed var(--paper-edge);
+}
+
+.page .page-no {
+  position: absolute;
+  top: calc(5 * var(--px));
+  right: calc(9 * var(--px));
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* One line at every width: "Beyond the Horizon" measures ~11.5em
+   in the bold face, so a twelfth of the page's width fits it. */
+.title {
+  font-weight: 700;
+  font-size: 1.35rem;
+  font-size: min(2rem, 8.3cqi);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.page .signed {
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--grey);
+}
+
+/* the author's name links out, but stays in the byline's grey */
+.page .signed a {
+  color: inherit;
+}
+
+.page .signed a:hover {
+  color: var(--link-hover);
+}
+
+.page p {
+  font-size: clamp(0.95rem, 2.6vw, 1.05rem);
+  line-height: 1.75;
+}
+
+.page .first {
+  margin-top: 1.5rem;
+}
+
+.page p + p {
+  margin-top: 0.85em;
+}
+
+.page h2 {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0.45rem;
+}
+
+.page h2:not(:first-of-type) {
+  margin-top: 1.4rem;
+}
+
+.links,
+.socials {
+  list-style: none;
+  font-size: clamp(0.95rem, 2.6vw, 1.05rem);
+}
+
+.links {
+  line-height: 2;
+}
+
+/* Socials sit two to a row, each with its own little icon */
+.socials {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.socials a {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: clamp(2.5rem, 4.6vw, 2.9rem);
-  height: clamp(2.5rem, 4.6vw, 2.9rem);
-  color: var(--ink);
-  background: rgba(255, 246, 228, 0.34);
-  border: 2px solid var(--ink);
-  border-radius: 2px;
-  -webkit-tap-highlight-color: transparent;
-  transition:
-    transform 0.18s cubic-bezier(0.2, 0.8, 0.3, 1),
-    box-shadow 0.18s cubic-bezier(0.2, 0.8, 0.3, 1),
-    background-color 0.18s ease,
-    color 0.18s ease;
+  gap: 0.5rem;
+  line-height: 1.4;
 }
 
-.social svg {
-  width: 48%;
-  height: 48%;
+.px-icon {
+  flex: none;
+  width: calc(8 * var(--px));
+  height: calc(8 * var(--px));
   display: block;
 }
 
-.social:hover,
-.social:focus-visible {
-  background: var(--ink);
-  color: var(--cream);
-  transform: translate(-3px, -3px);
-  box-shadow: 5px 5px 0 rgba(31, 42, 71, 0.30);
+.mail {
+  overflow-wrap: anywhere;
 }
 
-.social:focus-visible {
-  outline: 2px solid var(--ember);
-  outline-offset: 3px;
-}
-
-.social:active {
-  transform: translate(0, 0);
-  box-shadow: 0 0 0 rgba(31, 42, 71, 0);
-  transition-duration: 0.06s;
-}
-
-/* Disclaimer — deliberately quiet, pinned low -------------- */
-.disclaimer {
+/* Page-turn arrows ----------------------------------------- */
+.turn {
   position: absolute;
-  left: var(--edge);
-  /* leave the corner to the social row */
-  right: calc(var(--edge) + 16rem);
-  bottom: clamp(1.5rem, 4vh, 2.5rem);
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.05em;
-  line-height: 1.5;
-  color: var(--ink-soft);
+  bottom: calc(6 * var(--px));
+  padding: var(--px);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Leaving overlay — a light dusk wash, not a curtain. The bar is
+.turn[hidden] {
+  display: none;
+}
+
+/* The game's hooked 18 x 10 arrow at one texture pixel to the
+   pixel. At rest it is just an outline the paper shows through;
+   under the pointer it fills in orange-red. */
+.turn svg {
+  display: block;
+  width: calc(18 * var(--px));
+  height: calc(10 * var(--px));
+}
+
+.turn .fill {
+  fill: none;
+}
+
+.turn .hi {
+  fill: var(--arrow-hi);
+}
+
+.turn .line {
+  fill: var(--arrow-line);
+}
+
+.turn .dark {
+  fill: var(--arrow-dark);
+}
+
+.turn:hover .fill,
+.turn:focus-visible .fill {
+  fill: var(--arrow-hover-fill);
+}
+
+.turn:hover .hi,
+.turn:focus-visible .hi {
+  fill: var(--arrow-hover-hi);
+}
+
+.turn:hover .line,
+.turn:focus-visible .line {
+  fill: var(--arrow-hover-line);
+}
+
+.turn:hover .dark,
+.turn:focus-visible .dark {
+  fill: var(--arrow-hover-dark);
+}
+
+.turn.prev {
+  left: calc(9 * var(--px));
+}
+
+.turn.prev svg {
+  transform: scaleX(-1);
+}
+
+.turn.next {
+  right: calc(12 * var(--px));
+}
+
+/* Paged mode — set by the inline script in <head>. Both pages
+   share one grid cell, so the book is always as tall as its
+   longer page and doesn't jump as you turn. */
+.js .pages {
+  display: grid;
+}
+
+.js .page {
+  grid-area: 1 / 1;
+  /* clears the arrow (6 below it, 10 tall, 1 of padding each
+     side) with a little air above */
+  padding-bottom: calc(21 * var(--px));
+  visibility: hidden;
+}
+
+.js .page + .page {
+  border-top: 0;
+}
+
+.js .page.is-current {
+  visibility: visible;
+}
+
+/* Open book — on a screen wide enough for two 146px pages at full
+   size, both lie open side by side and the arrows go away. Each page
+   is drawn just like the single page: stitched down its left edge,
+   page edges down its right, its own folded corner, with a strip of
+   the leather rim between them. Narrower screens keep the one-page
+   view above. ------------------------------------------------ */
+@media (min-width: 960px) {
+  .book {
+    width: min(calc(2 * 146 * var(--px) + 3 * var(--px)), 100%);
+    aspect-ratio: 295 / 180;
+  }
+
+  .pages,
+  .js .pages {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(3 * var(--px));
+    background: none;
+    box-shadow: none;
+    clip-path: none;
+  }
+
+  .pages::before,
+  .pages::after {
+    content: none;
+  }
+
+  .page,
+  .js .page {
+    grid-area: auto;
+    visibility: visible;
+    padding-bottom: calc(10 * var(--px));
+    background: var(--paper-bg);
+    box-shadow: var(--paper-edges);
+    clip-path: var(--paper-fold-cut);
+  }
+
+  .page + .page,
+  .js .page + .page {
+    border-top: 0;
+  }
+
+  .page::before {
+    content: '';
+    position: absolute;
+    top: calc(4 * var(--px));
+    bottom: calc(4 * var(--px));
+    left: calc(2 * var(--px));
+    width: calc(2 * var(--px));
+    background: var(--stitches) 0 0 / calc(2 * var(--px)) calc(12 * var(--px)) repeat-y;
+  }
+
+  .page::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: calc(7 * var(--px));
+    height: calc(7 * var(--px));
+    background: var(--fold) 0 0 / 100% 100% no-repeat;
+  }
+
+  .turn {
+    display: none;
+  }
+}
+
+/* Disclaimer — quiet, at the very foot ---------------------- */
+.disclaimer {
+  padding: 0.75rem 1rem 1rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.03em;
+  line-height: 1.5;
+  text-align: center;
+  color: rgba(255, 246, 228, 0.7);
+}
+
+/* Leaving overlay — a dusk wash with a loading bar. The bar is
    deliberately indeterminate: the navigation fires immediately, so a
    bar that filled to 100% would be implying progress it never
-   measures. It just says the button registered. ------------- */
+   measures. It just says the link registered. ---------------- */
 .leaving {
   position: fixed;
   inset: 0;
   z-index: 10;
   display: grid;
   place-items: center;
-  padding: var(--edge);
-  background: rgba(31, 42, 71, 0.30);
+  padding: 1rem;
+  background: rgba(20, 24, 40, 0.6);
   opacity: 0;
   transition: opacity 0.1s ease;
 }
@@ -287,23 +515,15 @@ body::after {
   flex-direction: column;
   align-items: center;
   gap: clamp(0.85rem, 2vw, 1.15rem);
-  /* Nudged just below centre so it clears the wordmark. Transform
-     rather than margin so the offset is exact, and vw rather than vh
-     so it can't grow on a tall window. */
-  transform: translateY(clamp(1.25rem, 2.5vw, 2.25rem));
 }
 
-/* Ink, not cream: against a wash this light, cream would sit at ~2.7:1.
-   Ink clears 4.5:1 and keeps the overlay in the page's own palette. */
 .leaving-msg {
-  font-family: var(--display);
   font-size: clamp(1rem, 3vw, 1.5rem);
   letter-spacing: 0.02em;
-  color: var(--ink);
+  color: var(--cream);
   text-align: center;
 }
 
-/* weight rather than colour — the warm accents all fail on this wash */
 .leaving-msg span {
   font-weight: 700;
 }
@@ -316,7 +536,7 @@ body::after {
 .loadbar i {
   width: clamp(11px, 2.4vw, 16px);
   height: clamp(15px, 3.2vw, 22px);
-  border: 2px solid rgba(31, 42, 71, 0.35);
+  border: 2px solid rgba(255, 246, 228, 0.35);
   background: transparent;
   /* CSS, not JS — script timers can be throttled once navigation
      starts, but the animation keeps running until the page unloads. */
@@ -335,80 +555,37 @@ body::after {
 @keyframes wave {
   0%, 60%, 100% {
     background-color: transparent;
-    border-color: rgba(31, 42, 71, 0.35);
+    border-color: rgba(255, 246, 228, 0.35);
   }
   30% {
-    background-color: var(--ink);
-    border-color: var(--ink);
+    background-color: var(--cream);
+    border-color: var(--cream);
   }
 }
 
-/* Small screens -------------------------------------------- */
-/* On a phone the sun sits high in the crop, so the block drops to
-   the calm band of water at the bottom. */
-@media (max-width: 560px) {
-  .content {
-    margin-top: auto;
-    margin-bottom: 0;
-  }
-
-  .stage {
-    padding-bottom: clamp(7rem, 20vh, 9rem);
-  }
-
-  .disclaimer {
-    right: var(--edge);
-  }
-
-  .socials {
-    bottom: clamp(3.5rem, 8vh, 4.5rem);
-  }
-}
-
+/* Small screens: two screen pixels to the texture pixel -------- */
 @media (max-width: 480px) {
-  .portals {
-    gap: 0.7rem;
+  :root {
+    --px: 2px;
   }
 
-  .portal {
-    flex: 1 1 100%;
-    justify-content: center;
-    padding: 0.9rem 1rem 0.75rem;
+  /* give the page the width, not the scenery */
+  .stage {
+    padding-inline: 0.5rem;
   }
 }
 
 /* Respect reduced motion ----------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  .wordmark,
-  .portals,
-  .socials {
-    animation: none;
-  }
-
-  .portal,
-  .social {
-    transition: background-color 0.18s ease, color 0.18s ease;
-  }
-
-  .portal:hover,
-  .portal:focus-visible,
-  .portal:active,
-  .social:hover,
-  .social:focus-visible,
-  .social:active {
-    transform: none;
-    box-shadow: none;
-  }
-
-  /* No travelling wave — hold a steady bar so there is still a
-     visible sign the button registered. */
   .leaving {
     transition: none;
   }
 
+  /* No travelling wave — hold a steady bar so there is still a
+     visible sign the link registered. */
   .loadbar i {
     animation: none;
-    background-color: var(--ink);
-    border-color: var(--ink);
+    background-color: var(--cream);
+    border-color: var(--cream);
   }
 }
